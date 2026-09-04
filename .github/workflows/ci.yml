@@ -8,8 +8,48 @@ on:
 permissions:
   contents: read
 
+env:
+  # Suites that exercise the plugin's own code with no database behind them.
+  UNIT_SUITES: src/dpop.test.ts src/webid.test.ts src/client-id-document.test.ts
+
 jobs:
   verify:
+    name: verify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm lint
+
+      - run: pnpm typecheck
+
+      - run: pnpm test
+
+      - run: pnpm build
+
+  runtime:
+    # The package declares `engines: node >= 20` and imports no Node builtins,
+    # so the suite runs on every supported major to keep that claim honest.
+    #
+    # Two wrinkles, both in tooling rather than in the package:
+    #
+    # 1. pnpm 11 itself needs `node:sqlite`, which Node 20 lacks. Dependencies
+    #    are therefore installed on Node 24, the runtime under test is switched
+    #    afterwards, and vitest is invoked directly so no pnpm process ever runs
+    #    on the older major.
+    # 2. `better-auth/test`'s `getTestInstance` also needs `node:sqlite` for its
+    #    in-memory database, so the integration suite cannot run on Node 20. The
+    #    database-free suites still cover the plugin's own runtime code there.
+    name: runtime (node ${{ matrix.node-version }})
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -22,15 +62,21 @@ jobs:
 
       - uses: actions/setup-node@v5
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24
           cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
-      - run: pnpm lint
+      - uses: actions/setup-node@v5
+        with:
+          node-version: ${{ matrix.node-version }}
 
-      - run: pnpm typecheck
+      - run: node --version
 
-      - run: pnpm test
-
-      - run: pnpm build
+      - name: Run tests
+        run: |
+          if [ "${{ matrix.node-version }}" = "20" ]; then
+            ./node_modules/.bin/vitest run $UNIT_SUITES
+          else
+            ./node_modules/.bin/vitest run
+          fi

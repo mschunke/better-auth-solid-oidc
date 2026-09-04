@@ -33,7 +33,13 @@ Protocol Server identifies a client that was never pre-registered.
 ## Requirements
 
 - `better-auth` >= 1.7.0
-- Node.js >= 20
+- Node.js >= 20 (or any runtime with WebCrypto and `fetch` — the plugin imports
+  no Node builtins, so Bun, Deno, and Cloudflare Workers work too)
+
+> [!NOTE]
+> Running this repository's own integration tests needs Node.js >= 22, because
+> Better Auth's test harness uses `node:sqlite`. That is a development-only
+> constraint; the published package is unaffected.
 
 ## Installation
 
