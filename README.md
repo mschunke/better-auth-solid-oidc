@@ -1,5 +1,6 @@
 # better-auth-solid-oidc
 
+[![CI](https://github.com/mschunke/better-auth-solid-oidc/actions/workflows/ci.yml/badge.svg)](https://github.com/mschunke/better-auth-solid-oidc/actions/workflows/ci.yml)
 [![npm](https://img.shields.io/npm/v/better-auth-solid-oidc.svg)](https://www.npmjs.com/package/better-auth-solid-oidc)
 [![license](https://img.shields.io/npm/l/better-auth-solid-oidc.svg)](./LICENSE)
 
