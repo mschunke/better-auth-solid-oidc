@@ -60,10 +60,11 @@ jobs:
 
       - uses: pnpm/action-setup@v4
 
+      # No `cache: pnpm` here: the action's cache steps shell out to pnpm, which
+      # would run after the runtime below has already switched to Node 20.
       - uses: actions/setup-node@v5
         with:
           node-version: 24
-          cache: pnpm
 
       - run: pnpm install --frozen-lockfile
 
